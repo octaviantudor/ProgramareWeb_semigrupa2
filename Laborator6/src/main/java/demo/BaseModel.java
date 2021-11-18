@@ -1,10 +1,7 @@
 package demo;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface BaseModel {
@@ -14,6 +11,13 @@ public interface BaseModel {
                 .filter(field -> Arrays.asList(fields).contains(field.getName()))
                 .map(field -> Map.entry(field.getName(), getFieldValue(field, this) ))
                 .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    default Map<String, Object> fieldsToMap() {
+        return Arrays.stream(getClass().getDeclaredFields())
+                .map(field -> Map.entry(field.getName(), getFieldValue(field, this) ))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

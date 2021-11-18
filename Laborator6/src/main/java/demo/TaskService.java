@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,8 @@ public class TaskService {
                 .filter(task -> isMatch(task, title, description, assignedTo, status, severity))
                 .collect(Collectors.toList());
     }
-    private boolean isMatch (TaskModel task, String title, String description, String assignedTo, TaskModel.TaskStatus status, TaskModel.TaskSeverity severity) {
+
+    private boolean isMatch(TaskModel task, String title, String description, String assignedTo, TaskModel.TaskStatus status, TaskModel.TaskSeverity severity) {
         return (title == null || task.getTitle().toLowerCase().startsWith(title.toLowerCase()))
                 && (description == null || task.getDescription().toLowerCase().startsWith(description.toLowerCase()))
                 && (assignedTo == null || task.getAssignedTo().toLowerCase().startsWith(assignedTo.toLowerCase()))
@@ -30,13 +32,27 @@ public class TaskService {
         return repository.findById(id);
     }
 
-    public TaskModel addTask (TaskModel task) throws IOException {
+    public TaskModel addTask(TaskModel task) throws IOException {
         repository.save(task);
         return task;
     }
 
-    public boolean updateTask (String id, TaskModel task) throws IOException {
-        if(repository.findById(id).isPresent()) {
+    public void importTasks(List<Map<String, Object>> taskModels, TaskModel.ImportFormat importFormat, String fileName) {
+
+        switch (importFormat) {
+            case CSV:
+                WriteUtils.writeToCSV(taskModels, fileName);
+            case XML:
+                try {
+                    WriteUtils.writeToXml(taskModels, fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+    }
+
+    public boolean updateTask(String id, TaskModel task) throws IOException {
+        if (repository.findById(id).isPresent()) {
             task.setId(id);
             repository.save(task);
             return true;
@@ -45,9 +61,9 @@ public class TaskService {
         }
     }
 
-    public boolean patchTask (String id, TaskModel task) throws IOException {
+    public boolean patchTask(String id, TaskModel task) throws IOException {
         Optional<TaskModel> existingTask = repository.findById(id);
-        if(existingTask.isPresent()) {
+        if (existingTask.isPresent()) {
             existingTask.get().patch(task);
             repository.save(existingTask.get());
             return true;
@@ -55,7 +71,8 @@ public class TaskService {
             return false;
         }
     }
-    public boolean deleteTask (String id) throws IOException {
+
+    public boolean deleteTask(String id) throws IOException {
         return repository.deleteById(id);
     }
 }

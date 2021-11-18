@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -27,9 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,6 +69,41 @@ public class TaskController {
             return ResponseEntity.ok(items);
         }
     }
+
+
+
+    @Operation(summary = "Import tasks", operationId = "importTask")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tasks imported"),
+            @ApiResponse(responseCode = "204", description = "No tasks found or wrong filename")
+    })
+    @GetMapping("/import")
+    public ResponseEntity<Object> importTasks (@RequestParam(required = false) String title,
+                                                  @RequestParam(required = false) String description,
+                                                  @RequestParam(required = false) String assignedTo,
+                                                  @RequestParam(required = false) TaskModel.TaskStatus status,
+                                                  @RequestParam(required = false) TaskModel.TaskSeverity severity,
+                                                  @RequestParam(required = false) String fileName,
+                                                  @RequestHeader(required = false, name="X-Fields") String fields,
+                                                  @RequestHeader(required = false, name="X-Import") TaskModel.ImportFormat importFormat) {
+        List<TaskModel> tasks = service.getTasks(title, description, assignedTo, status, severity);
+
+        if(tasks.isEmpty() || StringUtils.isEmpty(fileName)) {
+            return ResponseEntity.noContent().build();
+        }
+
+
+        if (StringUtils.isNotEmpty(fields)) {
+            service.importTasks(tasks.stream().map(task -> task.sparseFields(fields.split(","))).collect(Collectors.toList()), importFormat, fileName);
+        } else {
+            service.importTasks(tasks.stream().map(BaseModel::fieldsToMap).collect(Collectors.toList()), importFormat, fileName);
+        }
+
+       return ResponseEntity.ok(fileName + "."+importFormat);
+
+    }
+
+
 
 
     @Operation(summary = "Get a task", operationId = "getTask")

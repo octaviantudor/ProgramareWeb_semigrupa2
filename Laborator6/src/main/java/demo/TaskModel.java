@@ -1,7 +1,10 @@
 package demo;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
+@XmlRootElement
 public class TaskModel implements BaseModel {
 
     public enum TaskStatus {
@@ -14,6 +17,10 @@ public class TaskModel implements BaseModel {
         NORMAL,
         HIGH
     }
+    public enum ImportFormat{
+        CSV,
+        XML
+    }
     private String id;
     private String title;
     private String description;
@@ -25,6 +32,7 @@ public class TaskModel implements BaseModel {
         id = UUID.randomUUID().toString();
     }
 
+    @XmlAttribute
     public String getId() {
         return id;
     }
@@ -33,6 +41,7 @@ public class TaskModel implements BaseModel {
         this.id = id;
     }
 
+    @XmlAttribute
     public String getTitle() {
         return title;
     }
@@ -41,6 +50,7 @@ public class TaskModel implements BaseModel {
         this.title = title;
     }
 
+    @XmlAttribute
     public String getDescription() {
         return description;
     }
@@ -49,6 +59,7 @@ public class TaskModel implements BaseModel {
         this.description = description;
     }
 
+    @XmlAttribute
     public String getAssignedTo() {
         return assignedTo;
     }
@@ -57,6 +68,7 @@ public class TaskModel implements BaseModel {
         this.assignedTo = assignedTo;
     }
 
+    @XmlAttribute
     public TaskStatus getStatus() {
         return status;
     }
@@ -65,6 +77,7 @@ public class TaskModel implements BaseModel {
         this.status = status;
     }
 
+    @XmlAttribute
     public TaskSeverity getSeverity() {
         return severity;
     }
