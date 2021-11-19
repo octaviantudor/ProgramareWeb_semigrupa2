@@ -1,5 +1,6 @@
 package demo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,17 +38,19 @@ public class TaskService {
         return task;
     }
 
-    public void importTasks(List<Map<String, Object>> taskModels, TaskModel.ImportFormat importFormat, String fileName) {
+    public String importTasks(List<Map<String, Object>> taskModels, TaskModel.ImportFormat importFormat, String fileName) {
 
         switch (importFormat) {
             case CSV:
-                WriteUtils.writeToCSV(taskModels, fileName);
+                return ImportUtils.getCsvFormat(taskModels, fileName);
             case XML:
                 try {
-                    WriteUtils.writeToXml(taskModels, fileName);
+                    return ImportUtils.getXmlFormat(taskModels, fileName);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            default:
+                return StringUtils.EMPTY;
         }
     }
 

@@ -38,6 +38,7 @@ hs_err_pid*
 
 ### IntelliJ IDEA ###
 .idea
+.lib
 *.iws
 *.iml
 *.ipr

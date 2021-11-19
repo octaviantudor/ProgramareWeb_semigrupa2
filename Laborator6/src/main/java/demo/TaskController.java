@@ -78,28 +78,29 @@ public class TaskController {
             @ApiResponse(responseCode = "204", description = "No tasks found or wrong filename")
     })
     @GetMapping("/import")
-    public ResponseEntity<Object> importTasks (@RequestParam(required = false) String title,
-                                                  @RequestParam(required = false) String description,
-                                                  @RequestParam(required = false) String assignedTo,
-                                                  @RequestParam(required = false) TaskModel.TaskStatus status,
-                                                  @RequestParam(required = false) TaskModel.TaskSeverity severity,
-                                                  @RequestParam(required = false) String fileName,
-                                                  @RequestHeader(required = false, name="X-Fields") String fields,
-                                                  @RequestHeader(required = false, name="X-Import") TaskModel.ImportFormat importFormat) {
+    public ResponseEntity<?> importTasks (@RequestParam(required = false) String title,
+                                          @RequestParam(required = false) String description,
+                                          @RequestParam(required = false) String assignedTo,
+                                          @RequestParam(required = false) TaskModel.TaskStatus status,
+                                          @RequestParam(required = false) TaskModel.TaskSeverity severity,
+                                          @RequestParam(required = false) String fileName,
+                                          @RequestHeader(required = false, name="X-Fields") String fields,
+                                          @RequestHeader(required = false, name="X-Import") TaskModel.ImportFormat importFormat) {
         List<TaskModel> tasks = service.getTasks(title, description, assignedTo, status, severity);
 
-        if(tasks.isEmpty() || StringUtils.isEmpty(fileName)) {
+        if(tasks.isEmpty() || StringUtils.isEmpty(fileName) || importFormat == null) {
             return ResponseEntity.noContent().build();
         }
 
+        String items;
 
         if (StringUtils.isNotEmpty(fields)) {
-            service.importTasks(tasks.stream().map(task -> task.sparseFields(fields.split(","))).collect(Collectors.toList()), importFormat, fileName);
+            items = service.importTasks(tasks.stream().map(task -> task.sparseFields(fields.split(","))).collect(Collectors.toList()), importFormat, fileName);
         } else {
-            service.importTasks(tasks.stream().map(BaseModel::fieldsToMap).collect(Collectors.toList()), importFormat, fileName);
+            items = service.importTasks(tasks.stream().map(BaseModel::fieldsToMap).collect(Collectors.toList()), importFormat, fileName);
         }
 
-       return ResponseEntity.ok(fileName + "."+importFormat);
+        return ResponseEntity.ok(items);
 
     }
 

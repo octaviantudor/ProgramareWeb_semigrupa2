@@ -15,37 +15,30 @@ import java.io.*;
 import java.util.List;
 import java.util.Map;
 
-public class WriteUtils {
+public class ImportUtils {
 
     private static final String CSV_SEPARATOR = ";";
 
 
-    public static void writeToCSV(List<Map<String, Object>> taskMaps, String fileName) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("src/main/resources/csv/" + fileName + ".csv"), "UTF-8"));
+    public static String getCsvFormat(List<Map<String, Object>> taskMaps, String fileName) {
 
-            for (Map<String, Object> map : taskMaps) {
-                StringBuffer oneLine = new StringBuffer();
-                for (Map.Entry<String, Object> e : map.entrySet()) {
+        StringBuffer oneLine = new StringBuffer();
 
-                    oneLine.append(e.getValue());
-                    oneLine.append(CSV_SEPARATOR);
+        for (Map<String, Object> map : taskMaps) {
 
-                }
-                bw.write(oneLine.toString());
-                bw.newLine();
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+
+                oneLine.append(e.getValue());
+                oneLine.append(CSV_SEPARATOR);
+
             }
-            bw.flush();
-            bw.close();
-
-        } catch (UnsupportedEncodingException e) {
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
+            oneLine.append("\n");
         }
-
+        return oneLine.toString();
     }
 
-    public static void writeToXml(List<Map<String, Object>> taskMaps, String fileName) throws Exception {
+
+    public static String getXmlFormat(List<Map<String, Object>> taskMaps, String fileName) throws Exception {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -76,13 +69,12 @@ public class WriteUtils {
 
         DOMSource source = new DOMSource(doc);
 
-        File myFile = new File("src/main/resources/xml/" + fileName + ".xml");
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
 
-        StreamResult console = new StreamResult(System.out);
-        StreamResult file = new StreamResult(myFile);
+        transf.transform(source,result);
 
-        transf.transform(source, console);
-        transf.transform(source, file);
+        return writer.toString();
     }
 
 
